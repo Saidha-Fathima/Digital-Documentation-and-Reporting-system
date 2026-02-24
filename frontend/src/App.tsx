@@ -12,8 +12,8 @@ import EmployeeJobView from './components/EmployeeJobView';
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -24,15 +24,14 @@ function App() {
               <Route path="/jobs" element={<JobTracker />} />
               <Route path="/materials" element={<Materials />} />
               <Route path="/spareparts" element={<SpareParts />} />
-              {/* For employees, we could also keep the same jobs route; but we can add a separate one */}
               <Route path="/my-jobs" element={<EmployeeJobView />} />
             </Route>
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

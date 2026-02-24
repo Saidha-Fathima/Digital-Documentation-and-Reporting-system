@@ -1,3 +1,6 @@
-flask
-flask-cors
-flask-session
+fastapi
+uvicorn
+sqlalchemy
+passlib[bcrypt]
+python-jose
+pydantic
