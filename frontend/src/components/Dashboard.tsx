@@ -5,6 +5,16 @@ import { getMaterials } from '../materials';
 import { getSpareParts } from '../spareparts';
 import type { Job, Material, SparePart } from '../types';
 import { Link } from 'react-router-dom';
+import { 
+  FaClipboardList, 
+  FaCogs, 
+  FaCheckCircle, 
+  FaBox, 
+  FaExclamationTriangle, 
+  FaPlus, 
+  FaWrench, 
+  FaChartBar 
+} from 'react-icons/fa';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -74,28 +84,28 @@ const Dashboard: React.FC = () => {
         <StatCard
           title="Total Jobs"
           value={totalJobs}
-          icon="📋"
+          icon={<FaClipboardList />}
           color="bg-blue-500"
           link="/jobs"
         />
         <StatCard
           title="In Progress"
           value={inProgressJobs}
-          icon="⚙️"
+          icon={<FaCogs />}
           color="bg-yellow-500"
           link="/jobs"
         />
         <StatCard
           title="Completed"
           value={completedJobs}
-          icon="✅"
+          icon={<FaCheckCircle />}
           color="bg-green-500"
           link="/jobs"
         />
         <StatCard
           title="Materials"
           value={materials.length}
-          icon="📦"
+          icon={<FaBox />}
           color="bg-purple-500"
           link="/materials"
         />
@@ -106,7 +116,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-8 animate-pulse">
           <div className="flex items-start">
             <div className="flex-shrink-0">
-              <span className="text-2xl">⚠️</span>
+              <FaExclamationTriangle className="text-2xl text-red-600" />
             </div>
             <div className="ml-3 flex-1">
               <h3 className="text-lg font-medium text-red-800 mb-2">
@@ -201,25 +211,25 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <QuickActionButton
               to="/jobs"
-              icon="➕"
+              icon={<FaPlus />}
               title="Create New Job"
               description="Assign tasks to team members"
             />
             <QuickActionButton
               to="/materials"
-              icon="📦"
+              icon={<FaBox />}
               title="Add Materials"
               description="Update inventory"
             />
             <QuickActionButton
               to="/spareparts"
-              icon="🔧"
+              icon={<FaWrench />}
               title="Record Usage"
               description="Log spare parts consumption"
             />
             <QuickActionButton
               to="/spareparts"
-              icon="📊"
+              icon={<FaChartBar />}
               title="View Summary"
               description="Monthly reports"
             />
@@ -255,4 +265,4 @@ const QuickActionButton = ({ to, icon, title, description }: any) => (
   </Link>
 );
 
-export default Dashboard;6
+export default Dashboard;

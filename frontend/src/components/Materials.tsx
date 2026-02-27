@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getMaterials, createMaterial, updateMaterial, deleteMaterial } from '../materials';
 import type { Material } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 
 const Materials: React.FC = () => {
   const { user } = useAuth();
@@ -59,12 +60,10 @@ const Materials: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Materials</h1>
         {user?.role === 'manager' && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700"
-          >
-            + Add Material
-          </button>
+          <button onClick={() => setShowForm(true)} className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 flex items-center">
+            <FaPlus className="mr-2" />
+              Add Material
+            </button>
         )}
       </div>
 
@@ -150,8 +149,13 @@ const Materials: React.FC = () => {
                   </td>
                   {user?.role === 'manager' && (
                     <td className="px-4 py-2">
-                      <button onClick={() => handleEdit(mat)} className="text-blue-600 hover:underline mr-2">Edit</button>
-                      <button onClick={() => handleDelete(mat.id)} className="text-red-600 hover:underline">Delete</button>
+                      <button onClick={() => handleEdit(mat)} className="text-blue-600 hover:text-blue-800 transition-colors mr-3">
+                        <FaEdit />
+                      </button>
+
+                      <button onClick={() => handleDelete(mat.id)} className="text-red-600 hover:text-red-800 transition-colors">
+                        <FaTrash />
+                      </button>
                     </td>
                   )}
                 </tr>

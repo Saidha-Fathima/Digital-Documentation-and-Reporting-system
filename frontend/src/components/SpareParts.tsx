@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getSpareParts, addSparePartUsage, deleteSparePart, getMonthlySummary } from '../spareparts';
 import type { SparePart, MonthlySummary } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { FaTrash, FaPlus } from 'react-icons/fa';
 
 const SpareParts: React.FC = () => {
   const { user } = useAuth();
@@ -55,11 +56,9 @@ const SpareParts: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Spare Parts Consumption</h1>
         {user?.role === 'manager' && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700"
-          >
-            + Record Usage
+          <button onClick={() => setShowForm(true)} className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 flex items-center">
+            <FaPlus className="mr-2" />
+              Record Usage
           </button>
         )}
       </div>
@@ -166,7 +165,9 @@ const SpareParts: React.FC = () => {
                 <td className="px-4 py-2">{new Date(part.used_date).toLocaleDateString()}</td>
                 {user?.role === 'manager' && (
                   <td className="px-4 py-2">
-                    <button onClick={() => handleDelete(part.id)} className="text-red-600 hover:underline">Delete</button>
+                    <button onClick={() => handleDelete(part.id)} className="text-red-600 hover:text-red-800 transition-colors">
+                      <FaTrash />
+                    </button>
                   </td>
                 )}
               </tr>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getJobs, createJob, updateJob, deleteJob, getEmployees } from '../jobs';
 import type { Job } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
 
 const JobTracker: React.FC = () => {
   const { user } = useAuth();
@@ -79,11 +80,11 @@ const JobTracker: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Job Tracker</h1>
         {user?.role === 'manager' && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700"
-          >
-            + New Job
+          <button onClick={() => setShowForm(true)} className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">
+            <div className="flex items-center">
+              <FaPlus className="mr-2" />
+              New Job
+            </div>
           </button>
         )}
       </div>
@@ -222,8 +223,12 @@ const JobTracker: React.FC = () => {
                 <td className="px-4 py-2">{new Date(job.updated_at).toLocaleDateString()}</td>
                 {user?.role === 'manager' && (
                   <td className="px-4 py-2">
-                    <button onClick={() => handleEdit(job)} className="text-blue-600 hover:underline mr-2">Edit</button>
-                    <button onClick={() => handleDelete(job.id)} className="text-red-600 hover:underline">Delete</button>
+                    <button onClick={() => handleEdit(job)} className="text-blue-600 hover:text-blue-800 mr-3">
+                      <FaEdit />
+                    </button>
+                    <button onClick={() => handleDelete(job.id)} className="text-red-600 hover:text-red-800">
+                      <FaTrash />
+                    </button>
                   </td>
                 )}
               </tr>

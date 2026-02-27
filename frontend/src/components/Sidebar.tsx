@@ -1,22 +1,32 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { 
+  FaChartBar, 
+  FaClipboardList, 
+  FaBox, 
+  FaWrench, 
+  FaUser, 
+  FaSignOutAlt 
+} from 'react-icons/fa';
 
 const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
 
   const navigation = [
-    { name: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { name: 'Jobs', path: '/jobs', icon: '📋' },
-    { name: 'Materials', path: '/materials', icon: '📦' },
-    { name: 'Spare Parts', path: '/spareparts', icon: '🔧' },
-    ...(user?.role === 'employee' ? [{ name: 'My Jobs', path: '/my-jobs', icon: '👤' }] : []),
-  ];
+    { name: 'Dashboard', path: '/dashboard', icon: <FaChartBar /> },
+    { name: 'Jobs', path: '/jobs', icon: <FaClipboardList /> },
+    { name: 'Materials', path: '/materials', icon: <FaBox /> },
+    { name: 'Spare Parts', path: '/spareparts', icon: <FaWrench /> },
+    ...(user?.role === 'employee'
+    ? [{ name: 'My Jobs', path: '/my-jobs', icon: <FaUser /> }]
+    : []),
+];
 
   return (
     <div className="w-64 bg-gray-900 text-white h-screen flex flex-col">
       <div className="p-6">
-        <h1 className="text-2xl font-bold">Workshop Manager</h1>
+        <h1 className="text-2xl font-bold">Goltens DDRS</h1>
         <p className="text-sm text-gray-400 mt-2 capitalize">{user?.role}</p>
       </div>
 
@@ -44,7 +54,9 @@ const Sidebar: React.FC = () => {
           onClick={logout}
           className="flex items-center w-full px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
         >
-          <span className="mr-3 text-xl">🚪</span>
+          <span className="mr-3 text-xl">
+            <FaSignOutAlt />
+          </span>
           Logout
         </button>
       </div>
