@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useAuth } from '../context/AuthContext';
+import { FaPhone } from 'react-icons/fa';
 
 const Layout: React.FC = () => {
   const { user } = useAuth();
@@ -24,6 +25,9 @@ const Layout: React.FC = () => {
           <Outlet />
         </main>
       </div>
+      <a href="https://project-goltens-2026.vercel.app/" target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 bg-primary-600 text-white p-4 rounded-full shadow-lg hover:bg-primary-700 transition duration-300">
+        <FaPhone />
+      </a>
     </div>
   );
 };
