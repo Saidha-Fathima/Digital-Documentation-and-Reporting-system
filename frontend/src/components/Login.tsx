@@ -52,10 +52,10 @@ const Login: React.FC = () => {
             Login
           </button>
         </form>
-        <div className="mt-4 text-sm text-gray-600 text-center">
+        {/* <div className="mt-4 text-sm text-gray-600 text-center">
           Demo: manager@example.com / manager123 <br />
           employee@example.com / employee123
-        </div>
+        </div> */}
       </div>
     </div>
   );
