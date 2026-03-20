@@ -7,6 +7,7 @@ import {
   FaBox, 
   FaWrench, 
   FaUser, 
+  FaUsers,          // ← added for user management
   FaSignOutAlt 
 } from 'react-icons/fa';
 
@@ -14,14 +15,17 @@ const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
 
   const navigation = [
-    { name: 'Dashboard', path: '/dashboard', icon: <FaChartBar /> },
-    { name: 'Jobs', path: '/jobs', icon: <FaClipboardList /> },
-    { name: 'Materials', path: '/materials', icon: <FaBox /> },
-    { name: 'Spare Parts', path: '/spareparts', icon: <FaWrench /> },
+    { name: 'Dashboard',    path: '/dashboard',   icon: <FaChartBar /> },
+    { name: 'Jobs',         path: '/jobs',        icon: <FaClipboardList /> },
+    { name: 'Materials',    path: '/materials',   icon: <FaBox /> },
+    { name: 'Spare Parts',  path: '/spareparts',  icon: <FaWrench /> },
     ...(user?.role === 'employee'
-    ? [{ name: 'My Jobs', path: '/my-jobs', icon: <FaUser /> }]
-    : []),
-];
+      ? [{ name: 'My Jobs', path: '/my-jobs',     icon: <FaUser /> }]
+      : []),
+    ...(user?.role === 'manager'
+      ? [{ name: 'Users',     path: '/users',       icon: <FaUsers /> }]
+      : []),
+  ];
 
   return (
     <div className="w-64 bg-gray-900 text-white h-screen flex flex-col">

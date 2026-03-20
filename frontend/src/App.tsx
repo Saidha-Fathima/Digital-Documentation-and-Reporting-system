@@ -9,6 +9,8 @@ import JobTracker from './components/JobTracker';
 import Materials from './components/Materials';
 import SpareParts from './components/SpareParts';
 import EmployeeJobView from './components/EmployeeJobView';
+import Users from './components/users';           // ← add this import
+import NewUser from './components/NewUser';   
 
 function App() {
   return (
@@ -25,7 +27,16 @@ function App() {
               <Route path="/materials" element={<Materials />} />
               <Route path="/spareparts" element={<SpareParts />} />
               <Route path="/my-jobs" element={<EmployeeJobView />} />
+              
+              
+              {/* Add user management – only managers should reach here */}
+              <Route path="/users" element={<Users />} />
+              
+              {/* Optional: add new user form as separate page or modal later */}
+              {/* <Route path="/users/new" element={<UserForm />} /> */}
+              {/* <Route path="/users/:id/edit" element={<UserForm />} /> */}
             </Route>
+            <Route path="/users/new" element={<NewUser />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
