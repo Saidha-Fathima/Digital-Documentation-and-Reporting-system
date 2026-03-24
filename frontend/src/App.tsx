@@ -30,13 +30,16 @@ function App() {
               
               
               {/* Add user management – only managers should reach here */}
-              <Route path="/users" element={<Users />} />
+              
               
               {/* Optional: add new user form as separate page or modal later */}
               {/* <Route path="/users/new" element={<UserForm />} /> */}
               {/* <Route path="/users/:id/edit" element={<UserForm />} /> */}
             </Route>
-            <Route path="/users/new" element={<NewUser />} />
+            <Route element={<Layout />}>
+  <Route path="/users" element={<Users />} />
+  <Route path="/users/new" element={<NewUser />} />
+</Route>
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

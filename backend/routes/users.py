@@ -52,3 +52,71 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 def get_current_user_info(current_user: User = Depends(get_current_user)):
     return current_user
+
+# -------------------------------
+# GET ALL USERS (Manager/Admin only)
+# -------------------------------
+@router.get("/users", response_model=list[UserResponse])
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role not in ["manager", "admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    users = db.query(User).all()
+    return users
+
+
+# -------------------------------
+# DELETE USER (Manager/Admin only)
+# -------------------------------
+@router.delete("/users/{user_id}")
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role not in ["manager", "admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    db.delete(user)
+    db.commit()
+
+    return {"message": "User deleted successfully"}
+
+
+# -------------------------------
+# UPDATE USER (Manager/Admin only)
+# -------------------------------
+@router.put("/users/{user_id}", response_model=UserResponse)
+def update_user(
+    user_id: int,
+    updated_data: UserCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role not in ["manager", "admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.email = updated_data.email
+    user.name = updated_data.name or ""
+    user.role = updated_data.role
+
+    if updated_data.password:
+        user.password = hash_password(updated_data.password)
+
+    db.commit()
+    db.refresh(user)
+
+    return user

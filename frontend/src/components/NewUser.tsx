@@ -3,9 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaArrowLeft, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // adjust path
+import { useAuth } from '../context/AuthContext';
 
-// You can move this to types.ts later
 type UserRole = 'admin' | 'manager' | 'employee';
 
 interface NewUserForm {
@@ -32,7 +31,8 @@ const NewUser: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  if (user?.role !== 'manager') {
+  // Allow manager & admin
+  if (user?.role !== 'manager' && user?.role !== 'admin') {
     return (
       <div className="text-center mt-20 text-xl text-red-600">
         Only managers can create new users.
@@ -52,7 +52,7 @@ const NewUser: React.FC = () => {
     e.preventDefault();
     setError(null);
 
-    // Basic client-side validation
+    // Validation
     if (!form.name.trim()) return setError('Name is required');
     if (!form.email.includes('@')) return setError('Valid email is required');
     if (form.password.length < 6) return setError('Password must be at least 6 characters');
@@ -61,26 +61,34 @@ const NewUser: React.FC = () => {
     setLoading(true);
 
     try {
-      // ────────────────────────────────────────────────
-      //          REPLACE WITH YOUR REAL API CALL
-      // ────────────────────────────────────────────────
-      // Example:
-      // await api.post('/users', {
-      //   name: form.name.trim(),
-      //   email: form.email.trim().toLowerCase(),
-      //   password: form.password,
-      //   role: form.role,
-      // });
+      const token = localStorage.getItem('token');
 
-      // For demo – simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const res = await fetch('http://localhost:8000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // safe even if optional
+        },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim().toLowerCase(),
+          password: form.password,
+          role: form.role,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || 'Failed to create user');
+      }
 
       setSuccess(true);
 
-      // Optional: reset form or redirect after 2 seconds
       setTimeout(() => {
         navigate('/users');
       }, 1800);
+
     } catch (err: any) {
       setError(err.message || 'Failed to create user. Please try again.');
     } finally {
@@ -144,50 +152,44 @@ const NewUser: React.FC = () => {
           <div className="grid grid-cols-1 gap-6">
             {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name *
               </label>
               <input
                 type="text"
-                id="name"
                 name="name"
                 value={form.name}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="John Doe"
-                required
               />
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address *
               </label>
               <input
                 type="email"
-                id="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="name@company.com"
-                required
               />
             </div>
 
             {/* Role */}
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Role *
               </label>
               <select
-                id="role"
                 name="role"
                 value={form.role}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition"
-                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="employee">Employee</option>
                 <option value="manager">Manager</option>
@@ -196,55 +198,35 @@ const NewUser: React.FC = () => {
             </div>
 
             {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password *
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                placeholder="••••••••"
-                required
-              />
-            </div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg"
+            />
 
             {/* Confirm Password */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Confirm Password *
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                placeholder="••••••••"
-                required
-              />
-            </div>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg"
+            />
           </div>
 
           <div className="mt-10 flex justify-end gap-4">
-            <Link
-              to="/users"
-              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-            >
+            <Link to="/users" className="px-6 py-3 border rounded-lg">
               Cancel
             </Link>
 
             <button
               type="submit"
               disabled={loading}
-              className={`flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition disabled:opacity-60 disabled:cursor-not-allowed`}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg"
             >
               {loading && <FaSpinner className="animate-spin" />}
               {loading ? 'Creating...' : 'Create User'}

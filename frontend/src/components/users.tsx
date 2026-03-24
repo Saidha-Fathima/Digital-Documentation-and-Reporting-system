@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FaUsers, FaUserPlus, FaEdit, FaTrash, FaShieldAlt,FaUser } from 'react-icons/fa';
+import { FaUsers, FaUserPlus, FaEdit, FaTrash, FaShieldAlt, FaUser } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-// You should define this type in your types.ts file
 type User = {
-  id: string | number;
+  id: number;
   name: string;
   email: string;
-  role: 'manager' | 'employee' | 'admin'; // adjust roles as needed
-  created_at?: string;
-  last_login?: string;
+  role: 'manager' | 'employee' | 'admin';
 };
 
 const Users: React.FC = () => {
@@ -18,19 +15,25 @@ const Users: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Replace with your actual API call
+  // ✅ FETCH USERS FROM BACKEND
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // Example: const data = await getUsers();
-        // For demo purposes only — replace with real fetch
-        const mockUsers: User[] = [
-          { id: 1, name: 'John Manager', email: 'john@goltens.com', role: 'manager' },
-          { id: 2, name: 'Sara Tech',    email: 'sara@goltens.com', role: 'employee' },
-          { id: 3, name: 'Mike Worker',  email: 'mike@goltens.com', role: 'employee' },
-          { id: 4, name: 'Admin Root',   email: 'admin@goltens.com', role: 'admin' },
-        ];
-        setUsers(mockUsers);
+        const token = localStorage.getItem('token');
+
+        const res = await fetch('http://localhost:8000/api/users', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.detail || 'Failed to fetch users');
+        }
+
+        setUsers(data);
       } catch (err) {
         console.error('Failed to load users:', err);
       } finally {
@@ -38,12 +41,40 @@ const Users: React.FC = () => {
       }
     };
 
-    if (user?.role === 'manager') {
+    if (user?.role === 'manager' || user?.role === 'admin') {
       fetchUsers();
     }
   }, [user]);
 
-  if (user?.role !== 'manager') {
+  // ✅ DELETE USER
+  const handleDelete = async (id: number) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this user?');
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem('token');
+
+      const res = await fetch(`http://localhost:8000/api/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || 'Delete failed');
+      }
+
+      // Update UI
+      setUsers(prev => prev.filter(u => u.id !== id));
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  // ✅ ACCESS CONTROL
+  if (user?.role !== 'manager' && user?.role !== 'admin') {
     return (
       <div className="text-center mt-16 text-xl text-red-600">
         Access restricted to managers only.
@@ -51,6 +82,7 @@ const Users: React.FC = () => {
     );
   }
 
+  // ✅ LOADING UI (UNCHANGED)
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -77,7 +109,7 @@ const Users: React.FC = () => {
         </div>
 
         <Link
-          to="/users/new" // or use a modal
+          to="/users/new"
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg shadow-md transition-colors"
         >
           <FaUserPlus />
@@ -85,14 +117,14 @@ const Users: React.FC = () => {
         </Link>
       </div>
 
-      {/* Stats-like overview cards (optional but matches dashboard style) */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard title="Total Users" value={users.length} icon={<FaUsers />} color="bg-blue-500" />
         <StatCard title="Managers" value={users.filter(u => u.role === 'manager').length} icon={<FaShieldAlt />} color="bg-purple-500" />
         <StatCard title="Employees" value={users.filter(u => u.role === 'employee').length} icon={<FaUser />} color="bg-green-500" />
       </div>
 
-      {/* Main Table */}
+      {/* Table */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-800">All Users</h3>
@@ -102,34 +134,37 @@ const Users: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-medium text-gray-900">{u.name}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-600">{u.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  <td className="px-6 py-4">{u.name}</td>
+                  <td className="px-6 py-4 text-gray-600">{u.email}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       u.role === 'manager' ? 'bg-purple-100 text-purple-800' :
-                      u.role === 'admin'   ? 'bg-red-100 text-red-800' :
+                      u.role === 'admin' ? 'bg-red-100 text-red-800' :
                       'bg-green-100 text-green-800'
                     }`}>
                       {u.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+
+                  <td className="px-6 py-4">
                     <div className="flex gap-3">
                       <button className="text-blue-600 hover:text-blue-900">
                         <FaEdit />
                       </button>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button
+                        onClick={() => handleDelete(u.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
                         <FaTrash />
                       </button>
                     </div>
@@ -147,7 +182,6 @@ const Users: React.FC = () => {
         )}
       </div>
 
-      {/* Optional: small hint at bottom */}
       <p className="mt-6 text-sm text-gray-500 text-center">
         User management is available only to managers • Last updated: {new Date().toLocaleDateString()}
       </p>
@@ -155,7 +189,6 @@ const Users: React.FC = () => {
   );
 };
 
-/* Reusable StatCard from your Dashboard – just copy-pasted here for completeness */
 const StatCard = ({ title, value, icon, color }: any) => (
   <div className="bg-white rounded-lg shadow-md overflow-hidden">
     <div className={`${color} p-4`}>
