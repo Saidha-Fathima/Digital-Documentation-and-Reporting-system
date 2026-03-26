@@ -19,9 +19,9 @@ const Sidebar: React.FC = () => {
     { name: 'Jobs',         path: '/jobs',        icon: <FaClipboardList /> },
     { name: 'Materials',    path: '/materials',   icon: <FaBox /> },
     { name: 'Spare Parts',  path: '/spareparts',  icon: <FaWrench /> },
-    ...(user?.role === 'employee'
-      ? [{ name: 'My Jobs', path: '/my-jobs',     icon: <FaUser /> }]
-      : []),
+    // ...(user?.role === 'employee'
+    //   ? [{ name: 'My Jobs', path: '/my-jobs',     icon: <FaUser /> }]
+    //   : []),
     ...(user?.role === 'manager'
       ? [{ name: 'Users',     path: '/users',       icon: <FaUsers /> }]
       : []),

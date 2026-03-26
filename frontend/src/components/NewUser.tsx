@@ -235,9 +235,9 @@ const NewUser: React.FC = () => {
         </form>
       )}
 
-      <p className="mt-8 text-center text-sm text-gray-500">
+      {/* <p className="mt-8 text-center text-sm text-gray-500">
         New users will receive an email with login instructions (once email integration is added)
-      </p>
+      </p> */}
     </div>
   );
 };

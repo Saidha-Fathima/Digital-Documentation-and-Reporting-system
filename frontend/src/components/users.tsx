@@ -182,9 +182,9 @@ const Users: React.FC = () => {
         )}
       </div>
 
-      <p className="mt-6 text-sm text-gray-500 text-center">
+      {/* <p className="mt-6 text-sm text-gray-500 text-center">
         User management is available only to managers • Last updated: {new Date().toLocaleDateString()}
-      </p>
+      </p> */}
     </div>
   );
 };

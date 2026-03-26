@@ -151,7 +151,7 @@ const SpareParts: React.FC = () => {
             <tr>
               <th className="px-4 py-2 text-left">Part Name</th>
               <th className="px-4 py-2 text-left">Quantity Used</th>
-              <th className="px-4 py-2 text-left">Used By</th>
+              {/* <th className="px-4 py-2 text-left">Used By</th> */}
               <th className="px-4 py-2 text-left">Date</th>
               {user?.role === 'manager' && <th className="px-4 py-2 text-left">Actions</th>}
             </tr>
@@ -161,7 +161,7 @@ const SpareParts: React.FC = () => {
               <tr key={part.id} className="border-t">
                 <td className="px-4 py-2">{part.part_name}</td>
                 <td className="px-4 py-2">{part.quantity_used}</td>
-                <td className="px-4 py-2">{part.used_by_name || part.used_by}</td>
+                {/* <td className="px-4 py-2">{part.used_by_name || part.used_by}</td> */}
                 <td className="px-4 py-2">{new Date(part.used_date).toLocaleDateString()}</td>
                 {user?.role === 'manager' && (
                   <td className="px-4 py-2">
