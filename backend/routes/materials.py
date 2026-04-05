@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from models import Material, User
-from schemas import MaterialCreate, MaterialResponse, MaterialUpdate
+from models import Material, User, MaterialUsage, Notification
+from schemas import MaterialCreate, MaterialResponse, MaterialUpdate, MaterialUsageCreate, MaterialUsageResponse
 from dependencies import get_db, get_current_user
 
 router = APIRouter(prefix="/materials", tags=["Materials"])
@@ -67,3 +67,50 @@ def delete_material(
     db.delete(material)
     db.commit()
     return {"message": "Material deleted successfully"}
+
+@router.post("/{material_id}/use", response_model=MaterialUsageResponse)
+def use_material(
+    material_id: int,
+    usage: MaterialUsageCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    material = db.query(Material).filter(Material.id == material_id).first()
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found")
+        
+    if material.quantity < usage.quantity_used:
+        raise HTTPException(status_code=400, detail="Not enough stock available")
+        
+    material.quantity -= usage.quantity_used
+    
+    new_usage = MaterialUsage(
+        material_id=material_id,
+        quantity_used=usage.quantity_used,
+        used_by=current_user.id
+    )
+    db.add(new_usage)
+    
+    # Check for low stock alert
+    if material.quantity <= material.minimum_level:
+        managers = db.query(User).filter(User.role == "manager").all()
+        for mgr in managers:
+            notification = Notification(
+                user_id=mgr.id,
+                title="Low Stock Alert",
+                message=f"Material {material.material_name} is running low ({material.quantity} remaining).",
+                is_read=0
+            )
+            db.add(notification)
+            
+    db.commit()
+    db.refresh(new_usage)
+    
+    return {
+        "id": new_usage.id,
+        "material_id": new_usage.material_id,
+        "quantity_used": new_usage.quantity_used,
+        "used_by": new_usage.used_by,
+        "used_by_name": current_user.name,
+        "used_date": new_usage.used_date
+    }

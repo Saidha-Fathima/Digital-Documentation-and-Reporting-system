@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine, SessionLocal
-from models import User, Job, Material, SparePart
+from models import User, Job, Material, SparePart, SparePartUsage
 from auth import hash_password
-from routes import users, jobs, materials, spareparts
+from routes import users, jobs, materials, spareparts, notifications, reports
 from datetime import datetime
 
 Base.metadata.create_all(bind=engine)
@@ -22,6 +22,8 @@ app.include_router(users.router, prefix="/api", tags=["Authentication"])
 app.include_router(jobs.router, prefix="/api", tags=["Jobs"])
 app.include_router(materials.router, prefix="/api", tags=["Materials"])
 app.include_router(spareparts.router, prefix="/api", tags=["Spare Parts"])
+app.include_router(notifications.router, prefix="/api", tags=["Notifications"])
+app.include_router(reports.router, prefix="/api", tags=["Reports"])
 
 # -------------------------------
 # DATABASE SEED FUNCTION
@@ -108,37 +110,30 @@ def create_default_data():
         db.add_all(sample_materials)
         db.commit()
     
-    # Create sample spare parts if none exist and employee exists
-    if db.query(SparePart).count() == 0 and employee_user:
+    # Create sample spare parts if none exist
+    if db.query(SparePart).count() == 0:
         sample_parts = [
-            SparePart(
-                part_name="Fuel Injector",
-                quantity_used=2,
-                used_by=employee_user.id,
-                used_date=datetime.now()
-            ),
-            SparePart(
-                part_name="Oil Filter",
-                quantity_used=5,
-                used_by=employee_user.id,
-                used_date=datetime.now()
-            ),
-            SparePart(
-                part_name="Drive Belt",
-                quantity_used=1,
-                used_by=employee_user.id,
-                used_date=datetime.now()
-            ),
-            SparePart(
-                part_name="Hydraulic Seal",
-                quantity_used=4,
-                used_by=employee_user.id,
-                used_date=datetime.now()
-            )
+            SparePart(part_name="Fuel Injector", quantity=15, minimum_level=5),
+            SparePart(part_name="Oil Filter", quantity=25, minimum_level=10),
+            SparePart(part_name="Drive Belt", quantity=8, minimum_level=5),
+            SparePart(part_name="Hydraulic Seal", quantity=40, minimum_level=20)
         ]
         db.add_all(sample_parts)
         db.commit()
-    
+
+        # Seed some usages
+        if employee_user:
+            part = db.query(SparePart).first()
+            if part:
+                usage = SparePartUsage(
+                    spare_part_id=part.id,
+                    quantity_used=2,
+                    used_by=employee_user.id,
+                    used_date=datetime.now()
+                )
+                db.add(usage)
+                db.commit()
+
     db.close()
 
 # Call seed function on startup
@@ -156,6 +151,8 @@ def root():
             "/api/me",
             "/api/jobs",
             "/api/materials",
-            "/api/spareparts"
+            "/api/spareparts",
+            "/api/notifications",
+            "/api/reports"
         ]
     }

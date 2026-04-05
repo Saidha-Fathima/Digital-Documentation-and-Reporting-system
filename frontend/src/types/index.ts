@@ -21,15 +21,42 @@ export interface Material {
   material_name: string;
   quantity: number;
   minimum_level: number;
+  unit?: string;
+}
+
+export interface MaterialUsage {
+  id: number;
+  material_id: number;
+  quantity_used: number;
+  used_by: number;
+  used_by_name?: string;
+  used_date: string;
 }
 
 export interface SparePart {
   id: number;
   part_name: string;
+  quantity: number;
+  minimum_level: number;
+}
+
+export interface SparePartUsage {
+  id: number;
+  spare_part_id: number;
   quantity_used: number;
   used_by: number;
   used_by_name?: string;
   used_date: string;
+  part_name?: string;
+}
+
+export interface Notification {
+  id: number;
+  user_id: number;
+  title: string;
+  message: string;
+  is_read: number; // 0 or 1
+  created_at: string;
 }
 
 export interface MonthlySummary {

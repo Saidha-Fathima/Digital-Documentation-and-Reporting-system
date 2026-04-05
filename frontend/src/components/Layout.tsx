@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import NotificationsDropdown from './NotificationsDropdown';
 import { useAuth } from '../context/AuthContext';
 import { FaPhone } from 'react-icons/fa';
 
@@ -15,10 +16,12 @@ const Layout: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-800">
             {getPageTitle(window.location.pathname)}
           </h2>
-          <div className="ml-auto flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              {user?.email} ({user?.role})
-            </span>
+          <div className="ml-auto flex items-center space-x-6">
+            <NotificationsDropdown />
+            <div className="flex flex-col text-right">
+              <span className="text-sm font-medium text-gray-800">{user?.name}</span>
+              <span className="text-xs text-gray-500 capitalize">{user?.role}</span>
+            </div>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-8">
@@ -44,6 +47,10 @@ const getPageTitle = (path: string): string => {
       return 'Spare Parts';
     case '/my-jobs':
       return 'My Assigned Jobs';
+    case '/reports':
+      return 'Reporting & Analytics';
+    case '/users':
+      return 'User Management';
     default:
       return 'Workshop Manager';
   }

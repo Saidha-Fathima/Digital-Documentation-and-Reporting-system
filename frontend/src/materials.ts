@@ -1,5 +1,5 @@
 import api from './axiosConfig';
-import type { Material } from './types';
+import type { Material, MaterialUsage } from './types';
 
 export const getMaterials = async (): Promise<Material[]> => {
   const response = await api.get('/materials');
@@ -17,4 +17,9 @@ export const updateMaterial = async (id: number, material: Partial<Material>): P
 
 export const deleteMaterial = async (id: number): Promise<void> => {
   await api.delete(`/materials/${id}`);
+};
+
+export const reportMaterialUsage = async (id: number, quantity_used: number): Promise<MaterialUsage> => {
+  const response = await api.post(`/materials/${id}/use`, { material_id: id, quantity_used });
+  return response.data;
 };

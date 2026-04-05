@@ -62,6 +62,22 @@ class MaterialUpdate(BaseModel):
     minimum_level: Optional[int] = None
     unit: Optional[str] = None
 
+class MaterialUsageBase(BaseModel):
+    material_id: int
+    quantity_used: int
+
+class MaterialUsageCreate(MaterialUsageBase):
+    pass
+
+class MaterialUsageResponse(MaterialUsageBase):
+    id: int
+    used_by: int
+    used_by_name: Optional[str] = None
+    used_date: datetime
+    
+    class Config:
+        from_attributes = True
+
 class MaterialResponse(MaterialBase):
     id: int
     updated_at: datetime
@@ -72,17 +88,51 @@ class MaterialResponse(MaterialBase):
 # Spare Part schemas
 class SparePartBase(BaseModel):
     part_name: str
-    quantity_used: int = 1
+    quantity: int
+    minimum_level: int = 5
 
 class SparePartCreate(SparePartBase):
     pass
 
+class SparePartUpdate(BaseModel):
+    part_name: Optional[str] = None
+    quantity: Optional[int] = None
+    minimum_level: Optional[int] = None
+
 class SparePartResponse(SparePartBase):
+    id: int
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class SparePartUsageBase(BaseModel):
+    spare_part_id: int
+    quantity_used: int
+
+class SparePartUsageCreate(SparePartUsageBase):
+    pass
+
+class SparePartUsageResponse(SparePartUsageBase):
     id: int
     used_by: int
     used_by_name: Optional[str] = None
     used_date: datetime
     
+    class Config:
+        from_attributes = True
+
+# Notification schemas
+class NotificationBase(BaseModel):
+    title: str
+    message: str
+    is_read: int
+
+class NotificationResponse(NotificationBase):
+    id: int
+    user_id: int
+    created_at: datetime
+
     class Config:
         from_attributes = True
 

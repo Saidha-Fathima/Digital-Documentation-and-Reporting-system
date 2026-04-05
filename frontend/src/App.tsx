@@ -9,7 +9,8 @@ import JobTracker from './components/JobTracker';
 import Materials from './components/Materials';
 import SpareParts from './components/SpareParts';
 import EmployeeJobView from './components/EmployeeJobView';
-import Users from './components/users';           // ← add this import
+import Reports from './components/Reports';
+import Users from './components/users';
 import NewUser from './components/NewUser';   
 
 function App() {
@@ -27,7 +28,7 @@ function App() {
               <Route path="/materials" element={<Materials />} />
               <Route path="/spareparts" element={<SpareParts />} />
               <Route path="/my-jobs" element={<EmployeeJobView />} />
-              
+              <Route path="/reports" element={<Reports />} />
               
               {/* Add user management – only managers should reach here */}
               

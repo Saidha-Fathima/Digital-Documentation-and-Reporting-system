@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { getMaterials, createMaterial, updateMaterial, deleteMaterial } from '../materials';
+import { getMaterials, createMaterial, updateMaterial, deleteMaterial, reportMaterialUsage } from '../materials';
 import type { Material } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaMinusCircle } from 'react-icons/fa';
 
 const Materials: React.FC = () => {
   const { user } = useAuth();
   const [materials, setMaterials] = useState<Material[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [showUsageForm, setShowUsageForm] = useState(false);
   const [editing, setEditing] = useState<Material | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  
   const [formData, setFormData] = useState<Partial<Material>>({
     material_name: '',
     quantity: 0,
     minimum_level: 5,
   });
+  
+  const [usageData, setUsageData] = useState({ quantity_used: 1 });
 
   useEffect(() => {
     fetchMaterials();
@@ -55,6 +60,30 @@ const Materials: React.FC = () => {
     }
   };
 
+  const handleReportUsageClick = (mat: Material) => {
+    setSelectedMaterial(mat);
+    setUsageData({ quantity_used: 1 });
+    setShowUsageForm(true);
+  };
+
+  const handleUsageSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedMaterial) {
+      if (usageData.quantity_used > selectedMaterial.quantity) {
+        alert("Cannot use more than available in stock.");
+        return;
+      }
+      try {
+        await reportMaterialUsage(selectedMaterial.id, usageData.quantity_used);
+        setShowUsageForm(false);
+        setSelectedMaterial(null);
+        fetchMaterials();
+      } catch (err) {
+        alert("Failed to report usage.");
+      }
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -68,7 +97,7 @@ const Materials: React.FC = () => {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">{editing ? 'Edit Material' : 'Add Material'}</h2>
             <form onSubmit={handleSubmit}>
@@ -121,6 +150,42 @@ const Materials: React.FC = () => {
         </div>
       )}
 
+      {showUsageForm && selectedMaterial && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Report Usage: {selectedMaterial.material_name}</h2>
+            <p className="mb-4 text-sm text-gray-600">Available Stock: {selectedMaterial.quantity}</p>
+            <form onSubmit={handleUsageSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Quantity to Use</label>
+                <input
+                  type="number"
+                  name="quantity_used"
+                  min="1"
+                  max={selectedMaterial.quantity}
+                  value={usageData.quantity_used}
+                  onChange={(e) => setUsageData({ quantity_used: parseInt(e.target.value) || 1 })}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowUsageForm(false); setSelectedMaterial(null); }}
+                  className="px-4 py-2 border rounded"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded">
+                  Submit Usage
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded shadow overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -129,7 +194,7 @@ const Materials: React.FC = () => {
               <th className="px-4 py-2 text-left">Quantity</th>
               <th className="px-4 py-2 text-left">Min Level</th>
               <th className="px-4 py-2 text-left">Status</th>
-              {user?.role === 'manager' && <th className="px-4 py-2 text-left">Actions</th>}
+              <th className="px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -142,22 +207,30 @@ const Materials: React.FC = () => {
                   <td className="px-4 py-2">{mat.minimum_level}</td>
                   <td className="px-4 py-2">
                     {lowStock ? (
-                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">Low Stock</span>
+                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-medium pulse">Low Stock</span>
                     ) : (
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">OK</span>
+                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">Available</span>
                     )}
                   </td>
-                  {user?.role === 'manager' && (
-                    <td className="px-4 py-2">
-                      <button onClick={() => handleEdit(mat)} className="text-blue-600 hover:text-blue-800 transition-colors mr-3">
-                        <FaEdit />
-                      </button>
+                  <td className="px-4 py-2 flex space-x-3 items-center">
+                    <button 
+                      onClick={() => handleReportUsageClick(mat)}
+                      className="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center bg-primary-50 px-2 py-1 rounded"
+                    >
+                      <FaMinusCircle className="mr-1" /> Use
+                    </button>
 
-                      <button onClick={() => handleDelete(mat.id)} className="text-red-600 hover:text-red-800 transition-colors">
-                        <FaTrash />
-                      </button>
-                    </td>
-                  )}
+                    {user?.role === 'manager' && (
+                      <>
+                        <button onClick={() => handleEdit(mat)} className="text-blue-600 hover:text-blue-800 transition-colors">
+                          <FaEdit />
+                        </button>
+                        <button onClick={() => handleDelete(mat.id)} className="text-red-600 hover:text-red-800 transition-colors">
+                          <FaTrash />
+                        </button>
+                      </>
+                    )}
+                  </td>
                 </tr>
               );
             })}

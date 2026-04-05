@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getJobs } from '../jobs';
 import { getMaterials } from '../materials';
-import { getSpareParts } from '../spareparts';
-import type { Job, Material, SparePart } from '../types';
+import { getSparePartUsages } from '../spareparts';
+import type { Job, Material, SparePartUsage } from '../types';
 import { Link } from 'react-router-dom';
 import { 
   FaClipboardList, 
@@ -20,20 +20,20 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [recentParts, setRecentParts] = useState<SparePart[]>([]);
+  const [recentParts, setRecentParts] = useState<SparePartUsage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [jobsData, matsData, partsData] = await Promise.all([
+        const [jobsData, matsData, usagesData] = await Promise.all([
           getJobs(),
           getMaterials(),
-          getSpareParts()
+          getSparePartUsages()
         ]);
         setJobs(jobsData || []);
         setMaterials(matsData || []);
-        setRecentParts((partsData || []).slice(0, 5));
+        setRecentParts((usagesData || []).slice(0, 5));
       } catch (error) {
         console.error("Dashboard error:", error);
       } finally {
@@ -136,6 +136,13 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+
+
+        
+
+
+
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
